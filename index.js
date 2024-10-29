@@ -2,7 +2,7 @@ import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
-import authRoute from './routes/authRoute.js';
+import auth from '../backend/routes/authRoute.js'
 import connectToDb from './db/config.js';
 
 
@@ -16,7 +16,8 @@ app.use(cors())
 app.use(express.json());
 app.use(cookieParser());
 
-app.use('/api/v1/user', authRoute);
+app.use('/api/v1/user', auth);
+// app.use('/api/v1/profile', profileRoute);
 
 
 connectToDb();
