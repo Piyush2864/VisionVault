@@ -1,15 +1,14 @@
 import Profile from "../models/profile.js";
 
 
-
-
-
 export const createOrUpdateProfile = async (req, res) => {
-    const { userId } = req;
+    const  userId  = req.user.id;
+    console.log("userId:", userId)
     const { bio, profilePicture, contactDetails, location, skills, socialLinks } = req.body;
 
     try {
         let profile = await Profile.findOne({userId});
+        console.log("profile Id:", profile)
         
         if(profile) {
             profile.bio = bio || profile.bio
@@ -36,6 +35,7 @@ export const createOrUpdateProfile = async (req, res) => {
                 skills,
                 socialLinks
             });
+            console.log("New profile:", profile)
 
             await profile.save();
             return res. status(200).json({
@@ -54,7 +54,8 @@ export const createOrUpdateProfile = async (req, res) => {
 };
 
 export const getProfile = async(req, res) => {
-    const { userId } = req;
+    const  userId  = req.user.id;
+    console.log("Fetching profile for userId:", userId);
 
     try {
         const profile = await Profile.findOne({userId}).populate('userId', 'name email');

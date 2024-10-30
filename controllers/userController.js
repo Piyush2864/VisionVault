@@ -89,6 +89,12 @@ export const loginUserController = async (req, res) => {
             { expiresIn: "1h" }
         );
 
+        res.cookie('token', token, {
+            httpOnly: true,
+            maxAge: 3600000,
+            sameSite: 'strict'
+        });
+
         return res.status(200).json({
             success: true,
             message: "Login Successfully",
@@ -100,6 +106,7 @@ export const loginUserController = async (req, res) => {
                 roel: user.role,
                 isArtist: user.isArtist
             }
+            
         })
     } catch (error) {
         console.error("Loginb error:", error)
