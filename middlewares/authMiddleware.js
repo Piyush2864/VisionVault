@@ -8,9 +8,9 @@ export const authMiddlewares = (requiredRole = null) => {
 
     return async (req, res, next) => {
         try {
-            console.log("Cookies:", req.cookies); 
+            // console.log("Cookies:", req.cookies); 
             const token = req.cookies.token || req.headers.authorization?.split(' ')[1];
-            console.log(token, "token")
+            // console.log(token, "token")
             if(!token) {
                 return res.status(401).json({
                     success: false,
@@ -20,18 +20,18 @@ export const authMiddlewares = (requiredRole = null) => {
 
             const decoded = jwt.verify(token, process.env.JWT_SECRET);
             req.user = { id: decoded.id };
-            console.log("decoded token:", decoded)
+            // console.log("decoded token:", decoded)
             
 
             const user = await User.findById(req.user.id);
-            console.log("user:". user)
+            // console.log("user:". user)
             if(!user) {
                 return res.status(400).json({
                     success: false,
                     message: 'User not found'
                 });
             }
-            console.log("user:". user)
+            // console.log("user:". user)
 
 
             if(requiredRole && user.role !== requiredRole) {

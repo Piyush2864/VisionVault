@@ -8,7 +8,7 @@ export const createOrUpdateProfile = async (req, res) => {
 
     try {
         let profile = await Profile.findOne({userId});
-        console.log("profile Id:", profile)
+        // console.log("profile Id:", profile)
         
         if(profile) {
             profile.bio = bio || profile.bio
@@ -35,7 +35,7 @@ export const createOrUpdateProfile = async (req, res) => {
                 skills,
                 socialLinks
             });
-            console.log("New profile:", profile)
+            // console.log("New profile:", profile)
 
             await profile.save();
             return res. status(200).json({
@@ -45,7 +45,7 @@ export const createOrUpdateProfile = async (req, res) => {
             });
         }
     } catch (error) {
-        console.error("Error in createdprofile:", error)
+        // console.error("Error in createdprofile:", error)
         return res.status(500).json({
             success: false,
             message: 'Server error'
@@ -55,7 +55,7 @@ export const createOrUpdateProfile = async (req, res) => {
 
 export const getProfile = async(req, res) => {
     const  userId  = req.user.id;
-    console.log("Fetching profile for userId:", userId);
+    // console.log("Fetching profile for userId:", userId);
 
     try {
         const profile = await Profile.findOne({userId}).populate('userId', 'name email');
@@ -72,7 +72,7 @@ export const getProfile = async(req, res) => {
             profile
         });
     } catch (error) {
-        console.error("Error in getProfile:", error)
+        // console.error("Error in getProfile:", error)
         return res.status(500).json({
             success: false,
             message: "Server error"
