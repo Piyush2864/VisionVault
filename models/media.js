@@ -44,7 +44,7 @@ const mediaSchema = new Schema({
         default: Date.now
     },
 
-    public: {
+    hide: {
         type: Boolean,
         default: true
     }
