@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import auth from '../backend/routes/authRoute.js'
+import mediaRoute from '../backend/routes/mediaRoute.js'
 import connectToDb from './db/config.js';
 
 
@@ -17,6 +18,7 @@ app.use(express.json());
 app.use(cookieParser());
 
 app.use('/api/v1/user', auth);
+app.use('/api/v1/media', mediaRoute )
 
 // app.use('/api/v1/profile', profileRoute);
 

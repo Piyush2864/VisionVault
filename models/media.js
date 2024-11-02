@@ -20,7 +20,7 @@ const mediaSchema = new Schema({
 
     mediaType: {
         type: String,
-        enum: ['image', 'video'],
+        enum: ['images', 'video'],
         required: true
     },
 

@@ -46,7 +46,8 @@ const profileSchema = new Schema({
     },
 
     profilePicture: {
-        type: String
+        type: String,
+        default: null
     },
 
     socialLinks: {
