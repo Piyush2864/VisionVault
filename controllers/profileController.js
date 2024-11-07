@@ -2,9 +2,9 @@ import Profile from "../models/profile.js";
 
 
 export const createOrUpdateProfile = async (req, res) => {
-    const  userId  = req.user.id;
+    const  {userId}  = req.user.id;
     console.log("userId:", userId)
-    const { bio, profilePicture, contactDetails, location, skills, socialLinks } = req.body;
+    const {  bio, profilePicture, contactDetails, location, skills, socialLinks } = req.body;
 
     try {
         let profile = await Profile.findOne({userId});

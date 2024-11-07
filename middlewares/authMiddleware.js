@@ -53,6 +53,14 @@ export const authMiddlewares = (requiredRole = null) => {
 };
 
 
+// export const adminMiddleware = (req, res, next) => {
+//     const user = req.user; // Assume user is set by authMiddleware
+//     if (user.role !== 'admin') {
+//         return res.status(403).json({ message: 'Forbidden, admin access only' });
+//     }
+//     next();
+// };
+
 
 
    // const authHeader = req.headers.authorization;

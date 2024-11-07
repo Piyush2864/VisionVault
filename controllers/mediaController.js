@@ -1,362 +1,187 @@
-import mongoose from "mongoose";
-import Media from "../models/media.js";
-import cloudinary from 'cloudinary';
+import Media from '../models/media.js';
+import uploaddOnCloudinary from '../cloudinary.js';
+import fs from 'fs'
 
+// Create Media
+export const createMedia = async (req, res) => {
 
+  const userId = req.user.id;
+  // console.log(userId, "userId")
+  const {title, description, mediaType, tags } = req.body
 
-// export const createMedia = async (req,res) => {
+  try {
 
-//     const { title, description, mediaType, url, thumbnailUrl, tags, hide } = req.body;
+    if (!title || !mediaType) {
+      return res.status(400).json({
+        success: false,
+        message: "title and media are required"
+      });
+    }
 
-//     try {
-//         const media = new Media({
-//             userId: req.user.id,
-//             title,
-//             description,
-//             mediaType,
-//             url,
-//             thumbnailUrl,
-//             tags,
-//             hide
-//         });
+    const imagePath = req.files?.image[0].path;
+    console.log(imagePath, " image path")
+    const imageResponse = await uploaddOnCloudinary(imagePath)
+    console.log(imageResponse, 'imageresponse')
 
-//         await media.save();
-//         return res.status(201).json({
-//             success: true,
-//             message: 'Media created successfully',
-//             media
-//         });
-//     } catch (error) {
-//         console.error("Error in createmedia:", error);
-//         return res.status(500).json({
-//             success: false,
-//             message: 'Server error'
-//         });
-//     }
-// };
+    // if (!req.files || !req.files.image) {
+    //   return res.status(400).json({
+    //     success: false,
+    //     message: 'image file is required'
+    //   });
+    // }
 
-// // update media
-// export const updateMedia = async(req, res) => {
-//     const { mediaId } = req.params;
-//     const { title, description, mediaType, url, thumbnailUrl, tags, hide } = req.body;
-//     try {
-//         const media = await Media.findById(mediaId);
-//         if(!mediaId) {
-//             return res.status(404).json({
-//                 success: false,
-//                 message: 'Media not found'
-//             });
-//         }
+    // fs.unlinkSync(imagePath);
 
-//         // Update media fields
-//         media.title = title || media.title;
-//         media.description = description || media.description;
-//         media.mediaType = mediaType || media.mediaType;
-//         media.url = url || media.url;
-//         media.thumbnailUrl = thumbnailUrl || media.thumbnailUrl;
-//         media.tags = tags || media.tags;
-//         media.hide = hide || media.hide;
+    if (!imageResponse) {
+      return res.status(500).json({
+        success: false,
+        message: 'failed to upload file to cloudinary'
+      });
+    }
 
-//         await media.updateOne();
-//         return res.status(200).json({
-//             success: true,
-//             message: 'Media updated successfully',
-//             media
-//         });
-//     } catch (error) {
-//         console.error("Error in update media:", error)
-//         return res.status(500).json({
-//             success: false,
-//             message: 'Server error'
-//         });
-//     }
-// };
+    
 
-// // Delete media
-// export const deleteMedia = async(req,res) => {
-//     const { mediaId } = req.params;
-//     try {
-//         const media = await Media.findOne(mediaId);
-//         if(!media) {
-//             return res.status(404).json({
-//                 success: false,
-//                 message: 'Media not found'
-//             });
-//         }
-
-//         await media.remove();
-//         return res.status(200).json({
-//             success: true,
-//             message: 'Media deleted successfully'
-//         });
-//     } catch (error) {
-//         console.error("Error in deleting media")
-//         return res.status(500).json({
-//             success: false,
-//             message: 'Server error'
-//         });
-//     }
-// };
-
-// // Public media
-// export const getPublicMedia = async(req,res)=> {
-//     try {
-//         const media = await Media.find({ public: true}).populate('userId', 'name email');
-//         return res.status(200).json({
-//             success: true,
-//             media
-//         });
-//     } catch (error) {
-//         console.error("Error in fetching public media:", error);
-//         return res.status(500).json({
-//             success:false,
-//             message: 'Server error'
-//         });
-//     }
-// };
-
-// // Get all media from admin
-// export const getAllMediaForAdmin = async(req,res) => {
-//     try {
-//         const media = await Media.find().populate('userId', 'name email');
-//         return res.status(200).json({
-//             success: true,
-//             media
-//         });
-//     } catch (error) {
-//         console.error("Error fetching all media for admin:", error);
-//         return res.status(500).json({
-//             success:false,
-//             message: 'Server error'
-//         });
-//     }
-// };
-
-// // Get media by user Id (for the user to see their own media)
-// export const getMediaByUserId = async(req, res) => {
-//     const { userId } = req.params;
-//     try {
-//         const media = await Media.find({userId}).populate('userId', 'name email');
-//         return res.status(200).json({
-//             success:true,
-//             media
-//         });
-//     } catch (error) {
-//         console.error("Error fetching media by user Id:", error);
-//         return res.status(500).json({
-//             success:false,
-//             message: 'Server error '
-//         });
-//     }
-// };
-
-
-//Configure cloudinary
-cloudinary.v2.config({
-    cloud_name: process.env.CLOUDINARY_CLOUD_NAME || 'dwc1kyrwy',
-    api_key: process.env.CLOUDINARY_API_KEY || '587661277666165',
-    api_secret: process.env.CLOUDINARY_API_SECRET || 'mQHa2_jisA1e_xXhqVtCbWsEYj0'
-  });
-  
-
-//Helper function for uploading files to cloudinary 
-const uploadToCloudinary = async (file, folder) => {
-    return await cloudinary.v2.uploader.upload(file, {
-      folder,
-      resource_type: 'auto', // auto-detects the file type (image or video)
+    const media = new Media({
+      userId,
+      title,
+      description,
+      mediaType,
+      url: imageResponse.secure_url,
+      tags: tags ? tags.split(',').map(tag => tag.trim()) : []
     });
-  };
-  
-//create Media
-export const createMedia = async(req, res) => {
-    const { title, description, hide } = req.body;
-    const userId = req.user.id;
 
-    try {
-        const mediaArray = [];
+    await media.save();
 
-        //Process images 
-        if(req.files['images']) {
-            for(const file of req.files['images']) {
-                const result = await uploadToCloudinary(file.buffer, 'images');
-                mediaArray.push({
-                    userId,
-                    title: title  || 'untitled image',
-                    description, 
-                    mediaType: 'image',
-                    url: result.secure_url,
-                    thumbnailUrl: result.eager && result.eager.length > 0 ? result.eager[0].secure_url: null,
-                    hide
-                });
-            }
-        }
-        //Process video
-        if(req.files['video'] && req.files['video'].length > 0){
-            const result = await uploadToCloudinary(req.files['video'][0].buffer, 'videos');
-            mediaArray.push({
-                userId,
-                title: title  || 'Untitled video',
-                description,
-                mediaType: 'video',
-                url: result.secure_url,
-                thumbnailUrl: result.eager &&result.eager.length > 0 ? result.eager[0].secure_url: null,
-                hide
-            });
-        }
+    return res.status(201).json({
+      success: true,
+      message: 'Media created successfully',
+      imageResponse,
+      media
+    });
 
-        //save all media items to  the database
-        const createMediaEntries= await Media.insertMany(mediaArray);
-        console.log('media information:', createMediaEntries )
-        return res.status(201).json({
-            success: true,
-            message: 'media uploaded successfully',
-            data: createMediaEntries
-        })
-    } catch (error) {
-        console.error('Error creating media:', error);
-        return res.status(500).json({
-            success: false,
-            message: 'Server error '
-        });
-    }
+  } catch (error) {
+    console.error('Error creating media:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal Server Error'
+    });
+  }
 };
 
-// Update media
+// Update Media
 export const updateMedia = async(req, res) => {
+  const userId = req.user.id;
+  const {mediaId} = req.params;
+  const { title, description, mediaType, tags, url, hide} = req.body;
+
+  try {
+    const media = await Media.findOne({_id: mediaId, userId});
+    if(!media) {
+      return res.status(404).json({
+        success: false,
+        message: 'Media not found'
+      });
+    }
+
+    if(title) media.title = title;
+    if(description) media.description = description;
+    if(mediaType) media.mediaType = mediaType;
+    if(tags) media.tags = tags;
+    if(url) media.url = cloudinaryResult.secure_url;
+
+
+    if(req.file) {
+      const newImagePath = req.file.path;
+
+      const cloudinaryResult = await uploaddOnCloudinary(newImagePath);
+      if(!cloudinaryResult) {
+        return res.status(500).json({
+          success: true,
+          message: 'failed to upload cloudinary'
+        });
+      }
+    }
+    
+    if(hide !==undefined) media.hide = hide;
+
+    // fs.unlinkSync(newImagePath);
+
+    await media.updateOne();
+
+    return res.status(200).json({
+      success: true,
+      message: 'Media updated successfully',
+      media
+    });
+
+  } catch (error) {
+    console.error("Error updating media:", error);
+    return res.status(500).json({
+      success: false,
+      message: 'Internal server erro'
+    });
+  }
+};
+// // Delete Media
+export const deleteMedia = async (req, res) => {
+  try {
     const { mediaId } = req.params;
-    const { title, description, hide } = req.body;
-
-    if(!mongoose.Types.ObjectId.isValid(mediaId)){
-        return res.status(400).json({
-            success: false,
-            message: 'Invalid mesia id'
-        })
-    };
-
-    try {
-        const updateMedia = await Media.findByIdAndUpdate(
-            mediaId,
-            {title, description, hide},
-            {new: true}
-        );
-
-        if(!updateMedia) {
-            return res.status(404).json({
-                success: false,
-                message: 'media not found'
-            });
-        }
-
-        return res.status(200).json({
-            success: true,
-            message: 'media updated successfully',
-            data: updateMedia
-        });
-    } catch (error) {
-        console.error('Error updating media:', error);
-        return res.status(500).json({
-            success: false,
-            message: 'Server error'
-        });
+    const userId = req.user.id;
+    const deletedMedia = await Media.findById(mediaId);
+    if (!deletedMedia) {
+      return res.status(404).json({ message: 'Media not found' });
     }
+
+    if (mediaId.userId && mediaId.userId.toString() !== userId) {
+      return res.status(403).json({
+        success: false,
+        message: 'You are not authorized to delete this media'
+      });
+    }
+
+    if (mediaId.url) {
+      const publicId = mediaId.url.split('/').pop().split('.')[0]; // Extract public ID from URL
+      await cloudinary.v2.uploader.destroy(publicId, { resource_type: mediaId.mediaType });
+    }
+    await Media.findByIdAndDelete(mediaId);
+
+    res.status(200).json({ message: 'Media deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting media:', error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
 };
 
-// Delete media
-export const deleteMedia = async(req, res) => {
-    const {mediaId} = req.params;
+// // Get Public Media
+// export const getPublicMedia = async (req, res) => {
+//   try {
+//     const publicMedia = await Media.find({ hide: false });
+//     res.status(200).json(publicMedia);
+//   } catch (error) {
+//     console.error('Error fetching public media:', error);
+//     res.status(500).json({ message: 'Internal Server Error' });
+//   }
+// };
 
-    if(!mongoose.Types.ObjectId.isValid(mediaId)){
-        return res.status(400).json({
-            success: false,
-            message: 'Invalid mediaId'
-        });
-    }
+// // Get All Media for Admin
+// export const getAllMediaForAdmin = async (req, res) => {
+//   try {
+//     const allMedia = await Media.find();
+//     res.status(200).json(allMedia);
+//   } catch (error) {
+//     console.error('Error fetching media for admin:', error);
+//     res.status(500).json({ message: 'Internal Server Error' });
+//   }
+// };
 
-    try {
-        const media = await Media.findById(mediaId);
-        if(!media){
-            return res.status(404).json({
-                success: false,
-                message: 'media not found'
-            });
-        }
-
-        //Delete from cloudinary
-        const publicId = media.url.split('/').pop().split('.')[0];
-        await uploadToCloudinary.v2.uploader.destroy(publicId, { resource_type: media.mediaType});
-
-        // Delete from the database
-        await Media.findByIdAndDelete(mediaId);
-
-        return res.status(200).json({
-            success: false,
-            message: 'Media deleted successfully'
-        });
-    } catch (error) {
-        console.error('Error deleting media:', error);
-        return res.status(500).json({
-            success:false,
-            message:'Server error'
-        });
-    }
-};
-
-// Get publis media
-export const getPublicMedia = async(req, res) => {
-    try {
-        const media = await Media.find({ hide: false});
-        return res.status(200).json({
-            success: true,
-            data: media
-        });
-    } catch (error) {
-        console.error('Error fetching public media:', error);
-        return res.status(500).json({
-            success: false,
-            message: 'Server error'
-        });
-    }
-};
-
-//Get all media for admin
-export const getAllMediaForAdmin = async(req, res) => {
-    try {
-        const media = await Media.find();
-        return res.status(200).json({
-            success:true,
-            data: media
-        });
-    } catch (error) {
-        console.error('Error fetching media for admin:', error);
-        return res.status(500).json({
-            success: false,
-            message: 'server error'
-        });
-    }
-};
-
-//Get media by user id
-export const getMediaByUserId = async(req, res) => {
-    const { userId } = req.params;
-
-    if(!mongoose.Types.ObjectId.isValid(userId)){
-        return res.status(400).json({
-            success: false,
-            message: "Invalid user id"
-        });
-    }
-
-    try {
-        const media = await Media.find({ userId });
-        return res.status(200).json({
-            success: true,
-            data: media
-        });
-    } catch (error) {
-        console.error('Error fetching media id by user id:', error);
-        return res.status(500).json({
-            success: true,
-            message: 'server error'
-        });
-    }
-};
+// // Get Media by User ID
+// export const getMediaByUserId = async (req, res) => {
+//   try {
+//     const { userId } = req.params;
+//     const userMedia = await Media.find({ userId });
+//     res.status(200).json(userMedia);
+//   } catch (error) {
+//     console.error('Error fetching media by user ID:', error);
+//     res.status(500).json({ message: 'Internal Server Error' });
+//   }
+// };

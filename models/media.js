@@ -20,9 +20,14 @@ const mediaSchema = new Schema({
 
     mediaType: {
         type: String,
-        enum: ['images', 'video'],
+        enum: ['image', 'video'],
         required: true
     },
+
+    // categories: {
+    //     type: String,
+    //     required: true
+    // },
 
     url: {
         type: String,
@@ -39,16 +44,23 @@ const mediaSchema = new Schema({
         default: []
     },
 
-    uploadedAt: {
-        type: Date,
-        default: Date.now
-    },
-
     hide: {
         type: Boolean,
         default: true
+    },
+
+    like: {
+        type: Number,
+        default: 0
+    },
+
+    view: {
+        type: Number,
+        default: 0
     }
-});
+},
+ {timestamps: true}
+);
 
 
 const Media = mongoose.model('Media', mediaSchema);
