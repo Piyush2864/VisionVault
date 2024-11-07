@@ -1,6 +1,6 @@
 import express from 'express';
 import { upload } from '../middlewares/mediaMiddleware.js';
-import { createMedia, deleteMedia, updateMedia } from '../controllers/mediaController.js';
+import { createMedia, deleteMedia } from '../controllers/mediaController.js';
 import {authMiddlewares} from '../middlewares/authMiddleware.js'
 
 

@@ -1,6 +1,6 @@
 import Media from '../models/media.js';
 import uploaddOnCloudinary from '../cloudinary.js';
-import fs from 'fs'
+import cloudinary from 'cloudinary';
 
 // Create Media
 export const createMedia = async (req, res) => {
@@ -21,11 +21,11 @@ export const createMedia = async (req, res) => {
     const imagePath = req.files?.image[0].path;
     console.log(imagePath, " image path")
     //video upload
-    const videoPath = req.files?.video[0].path;
-    console.log(videoPath, 'videoPath')
+    // const videoPath = req.files?.video[0].path;
+    // console.log(videoPath, 'videoPath')
 
-    const videoResponse = await uploaddOnCloudinary(videoPath)
-    console.log(videoResponse, 'videoPath')
+    // const videoResponse = await uploaddOnCloudinary(videoPath)
+    // console.log(videoResponse, 'videoPath')
 
     const imageResponse = await uploaddOnCloudinary(imagePath)
     console.log(imageResponse, 'imageresponse')
@@ -36,8 +36,6 @@ export const createMedia = async (req, res) => {
     //     message: 'image file is required'
     //   });
     // }
-
-    // fs.unlinkSync(imagePath);
 
     if (!imageResponse) {
       return res.status(500).json({
@@ -51,7 +49,8 @@ export const createMedia = async (req, res) => {
       description,
       mediaType,
       url: imageResponse.secure_url,
-      tags: tags ? tags.split(',').map(tag => tag.trim()) : []
+      tags: tags ? tags.split(',').map(tag => tag.trim()) : [],
+      // thumbnailUrl: thumbnail.url
     });
 
     await media.save();
@@ -72,60 +71,62 @@ export const createMedia = async (req, res) => {
   }
 };
 
-// Update Media
-export const updateMedia = async(req, res) => {
-  const userId = req.user.id;
-  const {mediaId} = req.params;
-  const { title, description, mediaType, tags, url, hide} = req.body;
+// // Update Media
+// export const updateMedia = async(req, res) => {
+//   const userId = req.user.id;
+//   const {mediaId} = req.params;
+//   const { title, description, mediaType, tags, url, hide} = req.body;
 
-  try {
-    const media = await Media.findOne({_id: mediaId, userId});
-    if(!media) {
-      return res.status(404).json({
-        success: false,
-        message: 'Media not found'
-      });
-    }
+//   try {
+//     const media = await Media.findOne({_id: mediaId, userId});
+//     if(!media) {
+//       return res.status(404).json({
+//         success: false,
+//         message: 'Media not found'
+//       });
+//     }
 
-    if(title) media.title = title;
-    if(description) media.description = description;
-    if(mediaType) media.mediaType = mediaType;
-    if(tags) media.tags = tags;
-    if(url) media.url = cloudinaryResult.secure_url;
+//     if(title) media.title = title;
+//     if(description) media.description = description;
+//     if(mediaType) media.mediaType = mediaType;
+//     if(tags) media.tags = tags;
+//     if(url) media.url = cloudinaryResult.secure_url;
 
 
-    if(req.file) {
-      const newImagePath = req.file.path;
+//     if(req.file) {
+//       const newImagePath = req.file.path;
 
-      const cloudinaryResult = await uploaddOnCloudinary(newImagePath);
-      if(!cloudinaryResult) {
-        return res.status(500).json({
-          success: true,
-          message: 'failed to upload cloudinary'
-        });
-      }
-    }
+//       const cloudinaryResult = await uploaddOnCloudinary(newImagePath);
+//       if(!cloudinaryResult) {
+//         return res.status(500).json({
+//           success: true,
+//           message: 'failed to upload cloudinary'
+//         });
+//       }
+//     }
     
-    if(hide !==undefined) media.hide = hide;
+//     if(hide !==undefined) media.hide = hide;
 
-    // fs.unlinkSync(newImagePath);
+//     // fs.unlinkSync(newImagePath);
 
-    await media.updateOne();
+//     await media.updateOne();
 
-    return res.status(200).json({
-      success: true,
-      message: 'Media updated successfully',
-      media
-    });
+//     return res.status(200).json({
+//       success: true,
+//       message: 'Media updated successfully',
+//       media
+//     });
 
-  } catch (error) {
-    console.error("Error updating media:", error);
-    return res.status(500).json({
-      success: false,
-      message: 'Internal server erro'
-    });
-  }
-};
+//   } catch (error) {
+//     console.error("Error updating media:", error);
+//     return res.status(500).json({
+//       success: false,
+//       message: 'Internal server erro'
+//     });
+//   }
+// };
+
+
 // // Delete Media
 export const deleteMedia = async (req, res) => {
   try {
@@ -143,10 +144,10 @@ export const deleteMedia = async (req, res) => {
       });
     }
 
-    if (mediaId.url) {
-      const publicId = mediaId.url.split('/').pop().split('.')[0]; // Extract public ID from URL
-      await cloudinary.v2.uploader.destroy(publicId, { resource_type: mediaId.mediaType });
-    }
+    const publicId = deletedMedia.url.split('/').pop().split('.')[0]; // Extract public ID from URL
+      const result = await cloudinary.v2.uploader.destroy(publicId, { resource_type: mediaId.mediaType });
+      console.log(result.result,"result");
+    
     await Media.findByIdAndDelete(mediaId);
 
     res.status(200).json({ message: 'Media deleted successfully' });
@@ -156,36 +157,3 @@ export const deleteMedia = async (req, res) => {
   }
 };
 
-// // Get Public Media
-// export const getPublicMedia = async (req, res) => {
-//   try {
-//     const publicMedia = await Media.find({ hide: false });
-//     res.status(200).json(publicMedia);
-//   } catch (error) {
-//     console.error('Error fetching public media:', error);
-//     res.status(500).json({ message: 'Internal Server Error' });
-//   }
-// };
-
-// // Get All Media for Admin
-// export const getAllMediaForAdmin = async (req, res) => {
-//   try {
-//     const allMedia = await Media.find();
-//     res.status(200).json(allMedia);
-//   } catch (error) {
-//     console.error('Error fetching media for admin:', error);
-//     res.status(500).json({ message: 'Internal Server Error' });
-//   }
-// };
-
-// // Get Media by User ID
-// export const getMediaByUserId = async (req, res) => {
-//   try {
-//     const { userId } = req.params;
-//     const userMedia = await Media.find({ userId });
-//     res.status(200).json(userMedia);
-//   } catch (error) {
-//     console.error('Error fetching media by user ID:', error);
-//     res.status(500).json({ message: 'Internal Server Error' });
-//   }
-// };
