@@ -1,51 +1,51 @@
+import uploaddOnCloudinary from "../cloudinary.js";
 import Profile from "../models/profile.js";
 
-
-export const createOrUpdateProfile = async (req, res) => {
-    const  {userId}  = req.user.id;
-    console.log("userId:", userId)
-    const {  bio, profilePicture, contactDetails, location, skills, socialLinks } = req.body;
+export const createProfile = async(req, res) => {
+    const userId = req.user.id;
+    const {contactDetails, location, bio, socialLinks, skills, availability} = req.body;
 
     try {
-        let profile = await Profile.findOne({userId});
-        // console.log("profile Id:", profile)
-        
+        const profile = await Profile.findOne({userId});
         if(profile) {
-            profile.bio = bio || profile.bio
-            profile.profilePicture = profilePicture || profile.profilePicture
-            profile.contactDetails = contactDetails || profile.contactDetails
-            profile.location = location || profile.location
-            profile.skills = skills || profile.skills
-            profile.socialLinks = socialLinks || profile.socialLinks
-
-            await profile.updateOne();
-            return res.status(200).json({
-                success: true,
-                message: 'Profile updated successfully',
-                profile
+            return res.status(400).json({
+                success: false,
+                message: 'profile already created'
             });
         }
-        else{
-            profile = new Profile({
-                userId,
-                bio,
-                profilePicture,
-                contactDetails,
-                location,
-                skills,
-                socialLinks
-            });
-            // console.log("New profile:", profile)
 
-            await profile.save();
-            return res. status(200).json({
-                success: true,
-                message: 'Profile created successfully',
-                profile
-            });
-        }
+        // const profilePath = req.files?.profilePicture[0].path;
+        // console.log(profilePath,'ProfilePath');
+
+        // const profileResponse = await uploaddOnCloudinary(profilePath);
+        // console.log(profileResponse,'profileResponse');
+
+        // if(!profileResponse) {
+        //     return res.status(404).json({
+        //         success: false,
+        //         messahe: 'failed to upload file on cloudinary'
+        //     });
+        // }
+
+        const newProfile = new Profile({
+            userId,
+            contactDetails,
+            location,
+            bio,
+            socialLinks,
+            skills,
+            availability,
+        });
+
+        await newProfile.save();
+
+        return res.status(200).json({
+            success: true,
+            message: 'Profile created successfully',
+            newProfile
+        })
     } catch (error) {
-        // console.error("Error in createdprofile:", error)
+        console.error("Error in created profile", error)
         return res.status(500).json({
             success: false,
             message: 'Server error'
@@ -53,29 +53,38 @@ export const createOrUpdateProfile = async (req, res) => {
     }
 };
 
-export const getProfile = async(req, res) => {
-    const  userId  = req.user.id;
-    // console.log("Fetching profile for userId:", userId);
+export const uploadProfilePicture = async(req, res) => {
+    const userId = req.user.id;
 
     try {
-        const profile = await Profile.findOne({userId}).populate('userId', 'name email');
-
+        const profile = await Profile.findOne({userId});
         if(!profile) {
-            return res.status(404).json({
-                success:false,
-                message: 'Profile not found',
+            return res.status(400).json({
+                success: false,
+                message:'User not find'
             });
         }
 
+        const profileImagePath = req.files?.profilePicture[0].path;
+        console.log(profileImagePath, 'profilePath');
+
+        const profileResponse = await uploaddOnCloudinary(profileImagePath);
+        console.log(profileResponse,'profileresponse');
+
+        profile.profilePicture = profileResponse.url;
+        await profile.save();
+
         return res.status(200).json({
             success: true,
-            profile
+            message: 'Profile picture uploaded successfully',
+            data: {profilePicture: profile.profilePicture}
         });
+
     } catch (error) {
-        // console.error("Error in getProfile:", error)
+        console.error("Erorr in profile photo uploading", error);
         return res.status(500).json({
             success: false,
-            message: "Server error"
+            message: 'Server error'
         });
     }
 };

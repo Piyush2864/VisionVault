@@ -1,11 +1,15 @@
 import express from 'express';
-import { createOrUpdateProfile, getProfile } from '../controllers/profileController';
+import { createProfile, uploadProfilePicture } from '../controllers/profileController.js';
+import { authMiddlewares } from '../middlewares/authMiddleware.js';
+import { upload } from '../middlewares/mediaMiddleware.js';
 
 
 const router = express.Router();
 
-router.route('/').post(createOrUpdateProfile);
-router.route('/').get(getProfile);
+router.route('/profile-create').post(authMiddlewares(), createProfile);
+router.route('/profile-photo').post(authMiddlewares(),  upload.fields([
+    {name: 'profilePicture', maxCount: 1}
+]),uploadProfilePicture )
 
 
 
