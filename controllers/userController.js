@@ -29,7 +29,6 @@ export const registerUserController = async (req, res) => {
             email,
             password: hashedPassword,
             role,
-            isArtist: role === 'artist'
         });
 
         await newUser.save()
@@ -104,7 +103,6 @@ export const loginUserController = async (req, res) => {
                 name: user.name,
                 email: user.email,
                 roel: user.role,
-                isArtist: user.isArtist
             }
             
         })

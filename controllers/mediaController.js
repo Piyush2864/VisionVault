@@ -7,7 +7,7 @@ export const createMedia = async (req, res) => {
 
   const userId = req.user.id;
   console.log(userId, "userId")
-  const {title, description, mediaType, tags } = req.body
+  const {title, description, mediaType, tags, categories } = req.body
 
   try {
 
@@ -48,6 +48,7 @@ export const createMedia = async (req, res) => {
       title,
       description,
       mediaType,
+      categories,
       url: imageResponse.secure_url,
       tags: tags ? tags.split(',').map(tag => tag.trim()) : [],
       // thumbnailUrl: thumbnail.url

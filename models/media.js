@@ -24,10 +24,10 @@ const mediaSchema = new Schema({
         required: true
     },
 
-    // categories: {
-    //     type: String,
-    //     required: true
-    // },
+    categories: {
+        type: String,
+        required: true
+    },
 
     url: {
         type: String,

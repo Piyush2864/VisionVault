@@ -28,10 +28,6 @@ const userSchema = new Schema({
         default: "user"
     },
 
-    isArtist: {
-        type: Boolean,
-        default: false
-    }
 },
     {
         timestamps: true
