@@ -7,12 +7,13 @@ import {authMiddlewares} from '../middlewares/authMiddleware.js'
 const router = express.Router();
 
 router.route('/upload').post(authMiddlewares(), upload.fields([
-    {name: 'image', maxCount: 1}
+    {name: 'image', maxCount: 1},
+    {name: 'video', maxCount: 1}
 ]), createMedia);
 
-router.route('/update-upload/:mediaId').post(authMiddlewares(), upload.fields([
-    {name: 'image', maxCount: 1}
-]), updateMedia);
+// router.route('/update-upload/:mediaId').post(authMiddlewares(), upload.fields([
+//     {name: 'image', maxCount: 1}
+// ]), updateMedia);
 
 router.route('/delete/:mediaId').delete(authMiddlewares(), deleteMedia);
 

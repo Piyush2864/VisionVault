@@ -6,7 +6,7 @@ import fs from 'fs'
 export const createMedia = async (req, res) => {
 
   const userId = req.user.id;
-  // console.log(userId, "userId")
+  console.log(userId, "userId")
   const {title, description, mediaType, tags } = req.body
 
   try {
@@ -17,13 +17,20 @@ export const createMedia = async (req, res) => {
         message: "title and media are required"
       });
     }
-
+    //imahe upload
     const imagePath = req.files?.image[0].path;
     console.log(imagePath, " image path")
+    //video upload
+    const videoPath = req.files?.video[0].path;
+    console.log(videoPath, 'videoPath')
+
+    const videoResponse = await uploaddOnCloudinary(videoPath)
+    console.log(videoResponse, 'videoPath')
+
     const imageResponse = await uploaddOnCloudinary(imagePath)
     console.log(imageResponse, 'imageresponse')
 
-    // if (!req.files || !req.files.image) {
+    // if (!req.files?.image || !req.files?.image[0].path) {
     //   return res.status(400).json({
     //     success: false,
     //     message: 'image file is required'
@@ -38,9 +45,6 @@ export const createMedia = async (req, res) => {
         message: 'failed to upload file to cloudinary'
       });
     }
-
-    
-
     const media = new Media({
       userId,
       title,
