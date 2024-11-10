@@ -26,7 +26,8 @@ const mediaSchema = new Schema({
 
     categories: {
         type: String,
-        required: true
+        trim: true,
+        required: true,
     },
 
     url: {

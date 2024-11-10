@@ -14,19 +14,6 @@ export const createProfile = async(req, res) => {
             });
         }
 
-        // const profilePath = req.files?.profilePicture[0].path;
-        // console.log(profilePath,'ProfilePath');
-
-        // const profileResponse = await uploaddOnCloudinary(profilePath);
-        // console.log(profileResponse,'profileResponse');
-
-        // if(!profileResponse) {
-        //     return res.status(404).json({
-        //         success: false,
-        //         messahe: 'failed to upload file on cloudinary'
-        //     });
-        // }
-
         const newProfile = new Profile({
             userId,
             contactDetails,
