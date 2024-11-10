@@ -2,7 +2,7 @@ import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
-import auth from '../backend/routes/authRoute.js'
+import userRoute from '../backend/routes/authRoute.js'
 import mediaRoute from '../backend/routes/mediaRoute.js'
 import likeRoute from '../backend/routes/mediaRoute.js'
 import dashborad from '../backend/routes/dashboardRoute.js'
@@ -20,7 +20,7 @@ app.use(cors())
 app.use(express.json());
 app.use(cookieParser());
 
-app.use('/api/v1/user', auth);
+app.use('/api/v1/user', userRoute);
 app.use('/api/v1/profile', profileRoute);
 app.use('/api/v1/media', mediaRoute );
 app.use('/api/v1/like', likeRoute);
